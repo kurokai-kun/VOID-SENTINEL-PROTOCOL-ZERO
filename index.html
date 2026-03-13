@@ -7,31 +7,28 @@
     <style>
         :root { 
             --neon: #00ff41; --danger: #ff0000; --info: #00ffff; 
-            --gold: #ffd700; --mutation: #ff00ff; --super: #ffffff;
+            --gold: #ffd700; --mutation: #ff00ff; --super: #ffffff; --shield: #0077ff;
         }
         body { margin: 0; background: #000; color: var(--neon); font-family: 'Courier New', monospace; overflow: hidden; display: flex; width: 100vw; height: 100vh; user-select: none; }
         #main-frame { display: flex; width: 100%; height: 100%; }
         
-        /* SIDEBAR */
         #sidebar { 
             width: 280px; background: #080808; border-right: 1px solid var(--neon); 
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; 
             z-index: 50; transition: filter 0.1s; 
         }
         .glitch-active { animation: comms-jitter 0.1s infinite; filter: hue-rotate(180deg) brightness(2) contrast(3); border-right-color: var(--danger) !important; }
-        @keyframes comms-jitter { 0% { transform: translate(0); } 33% { transform: translate(-3px, 2px); } 66% { transform: translate(3px, -2px); } 100% { transform: translate(0); } }
+        @keyframes comms-jitter { 0% { transform: translate(0); } 33% { transform: translate(-4px, 2px); } 66% { transform: translate(4px, -2px); } 100% { transform: translate(0); } }
         
         #chat-log { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column-reverse; font-size: 0.75rem; color: #666; margin-top: 15px; border-top: 1px solid #222; }
         .log-entry { margin-bottom: 8px; border-left: 2px solid #333; padding-left: 10px; }
         .log-user { color: var(--info); font-weight: bold; }
 
-        /* VIEWPORT */
         #viewport { flex-grow: 1; position: relative; background: #000; overflow: hidden; display: flex; }
         canvas { display: block; cursor: crosshair; width: 100%; height: 100%; }
         
-        /* HUD */
         #hud { position: absolute; top: 20px; width: 96%; left: 2%; display: none; justify-content: space-between; pointer-events: none; z-index: 40; }
-        .panel { background: rgba(0,0,0,0.95); border: 1px solid var(--neon); padding: 10px 15px; text-transform: uppercase; font-size: 0.8rem; }
+        .panel { background: rgba(0,0,0,0.95); border: 1px solid var(--neon); padding: 10px 15px; text-transform: uppercase; font-size: 0.8rem; pointer-events: none; }
         #nova-bar { width: 120px; height: 10px; border: 1px solid var(--super); margin-top: 5px; background: #111; }
         #nova-fill { width: 0%; height: 100%; background: var(--super); box-shadow: 0 0 15px var(--super); }
 
@@ -39,7 +36,6 @@
         .wep-btn { padding: 8px 15px; border: 1px solid #333; color: #444; font-size: 0.7rem; background: #000; }
         .wep-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 15px var(--neon); }
 
-        /* OVERLAYS */
         .full-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; }
         .terminal-box { border: 1px solid var(--neon); padding: 30px; background: #000; text-align: center; width: 540px; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 40px rgba(0,255,65,0.1); }
         h1 { font-size: 2.2rem; letter-spacing: 10px; margin: 0 0 10px 0; color: var(--neon); text-shadow: 0 0 15px var(--neon); }
@@ -51,8 +47,6 @@
         .diff-row { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
         .diff-btn { padding: 8px 10px; font-size: 0.65rem; border: 1px solid #333; cursor: pointer; color: #555; }
         .diff-btn.selected { border-color: var(--neon); color: var(--neon); }
-        
-        /* HIGHLIGHTED MODES */
         .diff-btn[data-mode="HELL"] { border-color: #500; color: #500; }
         .diff-btn[data-mode="HELL"].selected { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 10px var(--danger); }
         
@@ -61,7 +55,6 @@
         @keyframes danger-pulse { 0% { box-shadow: 0 0 2px var(--danger); } 50% { box-shadow: 0 0 15px var(--danger); } 100% { box-shadow: 0 0 2px var(--danger); } }
 
         #rules-box { display: none; text-align: left; font-size: 0.8rem; color: #aaa; margin-top: 15px; border-top: 1px solid #222; padding-top: 15px; }
-        .rule-line { margin-bottom: 6px; }
         .color-ref { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border: 1px solid #fff; }
 
         #boss-bar-container { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 400px; height: 15px; border: 1px solid var(--danger); display: none; background: #111; z-index: 30; }
@@ -72,7 +65,7 @@
 
     <div id="main-frame">
         <div id="sidebar">
-            <div style="font-weight: bold; letter-spacing: 2px; color: var(--neon); margin-bottom: 5px;">[ SENTINEL_V24 ]</div>
+            <div style="font-weight: bold; letter-spacing: 2px; color: var(--neon); margin-bottom: 5px;">[ VOID_SENTINEL_V25 ]</div>
             <div id="chat-log"></div>
         </div>
 
@@ -80,28 +73,29 @@
             <div id="login-scr" class="full-overlay">
                 <div class="terminal-box">
                     <h1>VOID SENTINEL</h1>
-                    <p style="font-size: 10px; color: #444; letter-spacing: 4px;">PROTOCOL ZERO INITIALIZED</p>
+                    <p style="font-size: 10px; color: #444; letter-spacing: 4px;">CALIBRATED FOR 1080P</p>
                     
                     <div id="auth-form">
                         <input type="text" id="opID" placeholder="INPUT OPERATOR ID" maxlength="12">
                         <br>
                         <button onclick="authOperator()">AUTHENTICATE</button>
                         <br><br>
-                        <button onclick="toggleRules()" style="font-size: 0.6rem; border-color: #333; color: #666;">VIEW TACTICAL RULES</button>
+                        <button onclick="toggleRules()" style="font-size: 0.6rem; border-color: #333; color: #666;">TACTICAL RULES</button>
                     </div>
 
                     <div id="rules-box">
-                        <div class="rule-line"><span style="color:var(--info)">[CONTROLS]</span> Click Mouse: Fire. 1-4: Weapon Select. Space: Nova.</div>
-                        <div class="rule-line"><div class="color-ref" style="background:#0f4"></div> GREEN (+1): Core Block. Hits floor = FAILURE.</div>
-                        <div class="rule-line"><div class="color-ref" style="background:#f00"></div> RED (-10): Data Virus. Drives score negative.</div>
-                        <div class="rule-line"><div class="color-ref" style="background:#ffd700"></div> GOLD (+5): High-energy Super-Nova surge.</div>
-                        <div class="rule-line"><div class="color-ref" style="background:#ff00ff"></div> PURPLE (+20): Fighter threat. <b style="color:var(--danger)">HELL MODE ONLY.</b></div>
-                        <button onclick="toggleRules()" style="width:100%; margin-top: 10px; border-color: #444;">BACK</button>
+                        <div style="margin-bottom:10px;"><span style="color:var(--info)">[CONTROLS]</span> Mouse: Fire. 1-4: Weapons. Space: Nova.</div>
+                        <div><div class="color-ref" style="background:#0f4"></div> GREEN (+1): Failure on floor.</div>
+                        <div><div class="color-ref" style="background:#f00"></div> RED (-10): Virus. Drains score.</div>
+                        <div><div class="color-ref" style="background:#ffd700"></div> GOLD (+5): Nova energy boost.</div>
+                        <div><div class="color-ref" style="background:var(--shield)"></div> BLUE: Grants AEGIS Shield.</div>
+                        <div><div class="color-ref" style="background:#ff00ff"></div> PURPLE (+20): Fighter (Hell Mode).</div>
+                        <button onclick="toggleRules()" style="width:100%; margin-top: 15px; border-color: #444;">BACK</button>
                     </div>
 
                     <div id="ready-zone" style="display:none;">
                         <p style="color: var(--info);">OP: <span id="op-name"></span></p>
-                        <p style="color: var(--gold); font-size: 0.8rem;">Personal Best: <span id="op-pb">0</span></p>
+                        <p style="color: var(--gold); font-size: 0.8rem;">Personal Best: <span id="op-pb-val">0</span></p>
                         <div class="diff-row">
                             <div class="diff-btn" id="btn-EASY" onclick="setDiff('EASY', this)">EASY</div>
                             <div class="diff-btn selected" id="btn-NORMAL" onclick="setDiff('NORMAL', this)">NORMAL</div>
@@ -115,7 +109,7 @@
             </div>
 
             <div id="hud">
-                <div class="panel"><span id="hud-rank" style="color:var(--gold)">RECRUIT</span></div>
+                <div class="panel"><span id="hud-rank" style="color:var(--gold)">RECRUIT</span> | <span id="shield-stat" style="color:var(--shield)">SHIELD: OFF</span></div>
                 <div class="panel">SUPER-NOVA<div id="nova-bar"><div id="nova-fill"></div></div></div>
                 <div class="panel">SCORE: <span id="hud-score">0</span></div>
             </div>
@@ -138,14 +132,6 @@
                 </div>
             </div>
 
-            <div id="victory-scr" class="full-overlay" style="display:none;">
-                <div class="terminal-box" style="border-color: var(--gold);">
-                    <h1>MISSION ACCOMPLISHED</h1>
-                    <p style="font-size: 1.2rem; margin: 20px 0;">RANK: <span id="max-rank-title" style="color:#fff">---</span></p>
-                    <button onclick="location.reload()">FINALIZE DATA</button>
-                </div>
-            </div>
-
             <canvas id="canvas"></canvas>
         </div>
     </div>
@@ -155,14 +141,13 @@
         const hudScore = document.getElementById('hud-score'), hudRank = document.getElementById('hud-rank');
         const novaFill = document.getElementById('nova-fill'), chatLog = document.getElementById('chat-log');
         const bossBar = document.getElementById('boss-bar-container'), bossHpFill = document.getElementById('boss-hp');
-        const sidebar = document.getElementById('sidebar');
+        const sidebar = document.getElementById('sidebar'), shieldStat = document.getElementById('shield-stat');
         
         let opName = "", score = 0, isLive = false, frame = 0, activeWep = 1;
-        let blocks = [], projectiles = [], fx = [], enemyBolts = [], fighters = [], boss = null;
-        let charge = 0, loopId = null, currentDiff = "NORMAL", isBossActive = false, isBossRush = false;
+        let blocks = [], projectiles = [], fx = [], fighters = [], boss = null;
+        let charge = 0, loopId = null, currentDiff = "NORMAL", isBossActive = false, isBossRush = false, hasShield = false;
         const GROUND = 30;
 
-        // --- RESTORED CRISP AUDIO ---
         let audioCtx = null;
         function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
         function playSound(freq, type, duration, volume, slide = 0) {
@@ -177,10 +162,10 @@
         }
 
         const DIFF_CONFIG = {
-            EASY:   { speed: 0.8, spawn: 60, bossHp: 1000, target: 10000, rank: "GRAND WARDEN", fighters: false },
-            NORMAL: { speed: 1.0, spawn: 45, bossHp: 2000, target: 20000, rank: "VOID COMMANDER", fighters: false },
-            HARD:   { speed: 1.5, spawn: 25, bossHp: 4000, target: 30000, rank: "STRIKE OVERLORD", fighters: false },
-            HELL:   { speed: 3.0, spawn: 14, bossHp: 10000, target: 50000, rank: "VOID MASTER (OMEGA)", fighters: true }
+            EASY:   { speed: 0.5, spawn: 70, bossHp: 1000, target: 10000, rank: "GRAND WARDEN" },
+            NORMAL: { speed: 0.8, spawn: 50, bossHp: 2000, target: 20000, rank: "VOID COMMANDER" },
+            HARD:   { speed: 1.2, spawn: 30, bossHp: 4000, target: 30000, rank: "STRIKE OVERLORD" },
+            HELL:   { speed: 2.2, spawn: 16, bossHp: 10000, target: 50000, rank: "VOID MASTER (OMEGA)", fighters: true }
         };
 
         const RANK_TITLES = ["RECRUIT", "SENTINEL", "VETERAN", "GUARDIAN", "ELITE", "TITAN SLAYER"];
@@ -197,22 +182,19 @@
             document.getElementById('ready-zone').style.display = 'block';
             document.getElementById('op-name').innerText = opName;
             
-            // Memory Retrieval
+            // Fixed Storage Key
             const pb = localStorage.getItem('VS_PB_' + opName) || 0;
-            document.getElementById('op-pb').innerText = pb;
+            document.getElementById('op-pb-val').innerText = pb;
             
             checkRushStatus();
             playSound(800, 'sine', 0.2, 0.1);
-            addLog("SYS", "ENCRYPTION KEY ACCEPTED.");
         }
 
         function checkRushStatus() {
             const clears = JSON.parse(localStorage.getItem('VS_CLEARS_' + opName) || '{}');
             const rushBtn = document.getElementById('boss-rush-btn');
             if (clears.EASY && clears.NORMAL && clears.HARD && clears.HELL) {
-                rushBtn.disabled = false;
-                rushBtn.classList.add('unlocked');
-                rushBtn.innerText = "ENGAGE BOSS RUSH";
+                rushBtn.disabled = false; rushBtn.classList.add('unlocked'); rushBtn.innerText = "ENGAGE BOSS RUSH";
             }
         }
 
@@ -223,20 +205,16 @@
             playSound(400, 'square', 0.1, 0.05);
         }
 
-        function startBossRush() { isBossRush = true; launchGrid(); }
-
         function launchGrid() {
             const view = document.getElementById('viewport');
             const dpr = window.devicePixelRatio || 1;
             canvas.width = view.clientWidth * dpr;
             canvas.height = view.clientHeight * dpr;
             ctx.scale(dpr, dpr);
-            
             document.getElementById('login-scr').style.display = 'none';
             document.getElementById('breach-scr').style.display = 'none';
             document.getElementById('hud').style.display = 'flex';
             document.getElementById('weapon-deck').style.display = 'flex';
-            
             resetSystem();
             isLive = true; runEngine();
             playSound(100, 'sawtooth', 0.6, 0.2, 800);
@@ -244,9 +222,9 @@
 
         function resetSystem() {
             if (loopId) cancelAnimationFrame(loopId);
-            score = 0; frame = 0; charge = 0; isBossActive = false;
-            blocks = []; projectiles = []; fx = []; enemyBolts = []; fighters = []; boss = null;
-            hudScore.innerText = "0"; novaFill.style.width = "0%";
+            score = 0; frame = 0; charge = 0; isBossActive = false; hasShield = false;
+            blocks = []; projectiles = []; fx = []; fighters = []; boss = null;
+            hudScore.innerText = "0"; novaFill.style.width = "0%"; shieldStat.innerText = "SHIELD: OFF";
             bossBar.style.display = 'none'; sidebar.classList.remove('glitch-active');
         }
 
@@ -276,14 +254,15 @@
                 for (let i = 0; i < blocks.length; i++) {
                     let b = blocks[i];
                     if (Math.abs(this.x - (b.x+15)) < 26 && Math.abs(this.y - (b.y+15)) < 26) {
-                        if (b.type === 'penalty') { score -= 10; playSound(80, 'sine', 0.3, 0.2); }
-                        else if (b.type === 'bonus') { score += 5; charge = Math.min(100, charge + 15); playSound(1200, 'sine', 0.4, 0.1); }
-                        else { score += 1; charge = Math.min(100, charge + 2); playSound(600, 'square', 0.05, 0.05); }
-                        blocks.splice(i, 1); burst(this.x, this.y, b.type==='penalty'?'#f00':'#0f4'); updateProgression(); return true;
+                        if (b.type === 'penalty') score -= 10;
+                        else if (b.type === 'bonus') { score += 5; charge = Math.min(100, charge + 15); }
+                        else if (b.type === 'shield') { hasShield = true; shieldStat.innerText = "SHIELD: ACTIVE"; playSound(1000, 'sine', 0.5, 0.1, 500); }
+                        else { score += 1; charge = Math.min(100, charge + 2); }
+                        blocks.splice(i, 1); burst(this.x, this.y, b.type==='penalty'?'#f00':(b.type==='shield'?'#07f':'#0f4')); updateProgression(); return true;
                     }
                 }
                 if (boss && this.x > boss.x && this.x < boss.x + boss.width && this.y > boss.y && this.y < boss.y + boss.height) {
-                    boss.hp -= (this.type === 2 ? 50 : 8); playSound(150, 'sawtooth', 0.05, 0.1); return true;
+                    boss.hp -= (this.type === 2 ? 50 : 8); playSound(200, 'sawtooth', 0.05, 0.1); return true;
                 }
                 return false;
             }
@@ -293,29 +272,22 @@
         function updateProgression() {
             const cfg = DIFF_CONFIG[currentDiff];
             hudScore.innerText = score; novaFill.style.width = charge + "%";
-            
             if (score < 0) sidebar.classList.add('glitch-active'); else sidebar.classList.remove('glitch-active');
             hudRank.innerText = RANK_TITLES[Math.min(Math.floor((Math.max(0, score)/cfg.target) * 6), 5)];
-
             if (score >= cfg.target && !isBossRush) { 
                 const clears = JSON.parse(localStorage.getItem('VS_CLEARS_' + opName) || '{}');
-                clears[currentDiff] = true;
-                localStorage.setItem('VS_CLEARS_' + opName, JSON.stringify(clears));
+                clears[currentDiff] = true; localStorage.setItem('VS_CLEARS_' + opName, JSON.stringify(clears));
                 isLive = false; document.getElementById('victory-scr').style.display='flex'; document.getElementById('max-rank-title').innerText=cfg.rank; 
             }
-
             if ((score >= 500 || isBossRush) && !boss) { 
-                isBossActive = true;
-                const hp = isBossRush ? 5000 + (score*3) : cfg.bossHp;
+                isBossActive = true; const hp = isBossRush ? 5000 + (score*3) : cfg.bossHp;
                 boss = { x: (canvas.width/window.devicePixelRatio)/2 - 150, y: -100, width: 300, height: 80, hp, maxHp: hp, dir: 1, 
                 update(){ if(this.y < 60) this.y += 0.5; this.x += 2*this.dir; if(this.x<0 || this.x+this.width > (canvas.width/window.devicePixelRatio)) this.dir*=-1; bossBar.style.display='block'; bossHpFill.style.width=(this.hp/this.maxHp*100)+"%"; return this.hp > 0; }, 
                 draw(){ ctx.fillStyle="#050505"; ctx.strokeStyle="#f00"; ctx.lineWidth=4; ctx.fillRect(this.x,this.y,this.width,this.height); ctx.strokeRect(this.x,this.y,this.width,this.height); } }; 
-                playSound(50, 'sawtooth', 1.2, 0.4);
             }
         }
 
         function burst(x, y, c) { for(let i=0; i<10; i++) fx.push({ x, y, vx:(Math.random()-0.5)*15, vy:(Math.random()-0.5)*15, a:1, update(){ this.x+=this.vx; this.y+=this.vy; this.a-=0.05; return this.a>0; }, draw(){ ctx.globalAlpha=this.a; ctx.fillStyle=c; ctx.fillRect(this.x,this.y,3,3); ctx.globalAlpha=1; } }); }
-        function addLog(u, m) { const d = document.createElement('div'); d.className = 'log-entry'; d.innerHTML = `<span class="log-user">${u}:</span> ${m}`; chatLog.prepend(d); }
 
         function runEngine() {
             if (!isLive) return;
@@ -323,29 +295,35 @@
             const w = canvas.width / window.devicePixelRatio, h = canvas.height / window.devicePixelRatio;
             ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,w,h);
             ctx.fillStyle = '#0f4'; ctx.fillRect(0, h - GROUND, w, GROUND);
-            
+            if (hasShield) { ctx.strokeStyle = '#07f'; ctx.lineWidth = 4; ctx.strokeRect(0, h-GROUND, w, GROUND); }
+
             frame++;
             if (!isBossRush && frame % cfg.spawn === 0) {
                 let r = Math.random();
-                let type = r < 0.25 ? 'penalty' : (r > 0.9 ? 'bonus' : 'standard');
-                blocks.push({ x: Math.random()*(w-30), y:-50, type, speed: 2.5 * cfg.speed });
+                let type = r < 0.25 ? 'penalty' : (r > 0.98 ? 'shield' : (r > 0.9 ? 'bonus' : 'standard'));
+                blocks.push({ x: Math.random()*(w-30), y:-50, type, speed: 2.8 * cfg.speed });
             }
 
             blocks = blocks.filter(b => {
                 b.y += b.speed;
-                if (b.y > h - GROUND) { if(b.type === 'standard') { isLive=false; isBossActive=false; document.getElementById('breach-scr').style.display='flex'; document.getElementById('final-score').innerText=score; playSound(40, 'sawtooth', 1, 0.4); } return false; }
-                ctx.fillStyle = b.type==='penalty' ? '#f00' : (b.type==='bonus' ? '#ffd700' : '#0f4');
+                if (b.y > h - GROUND) { 
+                    if(b.type === 'standard' || b.type === 'bonus' || b.type === 'shield') { 
+                        if (hasShield) { hasShield = false; shieldStat.innerText = "SHIELD: OFF"; playSound(200, 'sine', 0.5, 0.2); return false; }
+                        isLive=false; document.getElementById('breach-scr').style.display='flex'; document.getElementById('final-score').innerText=score; 
+                    } return false; 
+                }
+                ctx.fillStyle = b.type==='penalty'?'#f00':(b.type==='bonus'?'#ffd700':(b.type==='shield'?'#07f':'#0f4'));
                 ctx.fillRect(b.x, b.y, 30, 30); ctx.strokeRect(b.x, b.y, 30, 30);
                 return true;
             });
             projectiles = projectiles.filter(p => p.update() ? (p.draw(), true) : false);
             fx = fx.filter(f => f.update() ? (f.draw(), true) : false);
-            if (boss) { if (!boss.update()) { boss = null; score += 2000; isBossActive = false; bossBar.style.display='none'; } else boss.draw(); }
+            if (boss) if (!boss.update()) { boss = null; score += 2000; isBossActive = false; bossBar.style.display='none'; } else boss.draw();
             loopId = requestAnimationFrame(runEngine);
         }
 
         window.addEventListener('keydown', (e) => {
-            if (['1','2','3','4'].includes(e.key)) { activeWep = parseInt(e.key); document.querySelectorAll('.wep-btn').forEach(b => b.classList.remove('active')); document.getElementById('w' + e.key).classList.add('active'); playSound(900, 'sine', 0.1, 0.05); }
+            if (['1','2','3','4'].includes(e.key)) { activeWep = parseInt(e.key); document.querySelectorAll('.wep-btn').forEach(b => b.classList.remove('active')); document.getElementById('w' + e.key).classList.add('active'); }
             if (e.code === 'Space' && charge >= 100) { charge = 0; novaFill.style.width = "0%"; blocks = []; if(boss) boss.hp -= 4000; playSound(40, 'sawtooth', 1.5, 0.6, 2000); }
         });
 
@@ -353,11 +331,11 @@
             if (!isLive) return;
             const rect = canvas.getBoundingClientRect();
             const w = canvas.width/window.devicePixelRatio, h = canvas.height/window.devicePixelRatio;
-            const mx = e.clientX - rect.left, my = e.clientY - rect.top;
+            const mx = (e.clientX - rect.left) * (w / rect.width);
+            const my = (e.clientY - rect.top) * (h / rect.height);
             const cx = w/2, by = h - GROUND;
-            if (activeWep === 3) {
-                for(let i=-1; i<=1; i++) projectiles.push(new Missile(cx, by, mx + (i*100), my, 3));
-            } else projectiles.push(new Missile(cx, by, mx, my, activeWep));
+            if (activeWep === 3) { for(let i=-1; i<=1; i++) projectiles.push(new Missile(cx, by, mx + (i*100), my, 3)); } 
+            else projectiles.push(new Missile(cx, by, mx, my, activeWep));
             playSound(activeWep === 2 ? 150 : 700, 'square', 0.1, 0.06);
         });
     </script>
