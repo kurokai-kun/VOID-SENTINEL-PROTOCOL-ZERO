@@ -12,21 +12,24 @@
         body { margin: 0; background: #000; color: var(--neon); font-family: 'Courier New', monospace; overflow: hidden; display: flex; width: 100vw; height: 100vh; user-select: none; }
         #main-frame { display: flex; width: 100%; height: 100%; }
         
+        /* SIDEBAR */
         #sidebar { 
             width: 280px; background: #080808; border-right: 1px solid var(--neon); 
             display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; 
             z-index: 50; transition: filter 0.1s; 
         }
         .glitch-active { animation: comms-jitter 0.1s infinite; filter: hue-rotate(180deg) brightness(2) contrast(3); border-right-color: var(--danger) !important; }
-        @keyframes comms-jitter { 0% { transform: translate(0); } 33% { transform: translate(-4px, 2px); } 66% { transform: translate(4px, -2px); } 100% { transform: translate(0); } }
+        @keyframes comms-jitter { 0% { transform: translate(0); } 33% { transform: translate(-3px, 2px); } 66% { transform: translate(3px, -2px); } 100% { transform: translate(0); } }
         
         #chat-log { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column-reverse; font-size: 0.75rem; color: #666; margin-top: 15px; border-top: 1px solid #222; }
         .log-entry { margin-bottom: 8px; border-left: 2px solid #333; padding-left: 10px; }
         .log-user { color: var(--info); font-weight: bold; }
 
+        /* VIEWPORT */
         #viewport { flex-grow: 1; position: relative; background: #000; overflow: hidden; display: flex; }
         canvas { display: block; cursor: crosshair; width: 100%; height: 100%; }
         
+        /* HUD */
         #hud { position: absolute; top: 20px; width: 96%; left: 2%; display: none; justify-content: space-between; pointer-events: none; z-index: 40; }
         .panel { background: rgba(0,0,0,0.95); border: 1px solid var(--neon); padding: 10px 15px; text-transform: uppercase; font-size: 0.8rem; pointer-events: none; }
         #nova-bar { width: 120px; height: 10px; border: 1px solid var(--super); margin-top: 5px; background: #111; }
@@ -36,8 +39,9 @@
         .wep-btn { padding: 8px 15px; border: 1px solid #333; color: #444; font-size: 0.7rem; background: #000; }
         .wep-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 15px var(--neon); }
 
+        /* SCREENS */
         .full-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .terminal-box { border: 1px solid var(--neon); padding: 30px; background: #000; text-align: center; width: 540px; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 40px rgba(0,255,65,0.1); }
+        .terminal-box { border: 1px solid var(--neon); padding: 40px; background: #000; text-align: center; width: 540px; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 40px rgba(0,255,65,0.1); }
         h1 { font-size: 2.2rem; letter-spacing: 10px; margin: 0 0 10px 0; color: var(--neon); text-shadow: 0 0 15px var(--neon); }
         input { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 15px; width: 100%; box-sizing: border-box; margin: 20px 0; text-align: center; font-family: inherit; font-size: 1.1rem; outline: none; }
         button { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 12px 25px; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: 0.3s; margin: 5px; }
@@ -47,6 +51,7 @@
         .diff-row { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
         .diff-btn { padding: 8px 10px; font-size: 0.65rem; border: 1px solid #333; cursor: pointer; color: #555; }
         .diff-btn.selected { border-color: var(--neon); color: var(--neon); }
+        
         .diff-btn[data-mode="HELL"] { border-color: #500; color: #500; }
         .diff-btn[data-mode="HELL"].selected { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 10px var(--danger); }
         
@@ -65,7 +70,7 @@
 
     <div id="main-frame">
         <div id="sidebar">
-            <div style="font-weight: bold; letter-spacing: 2px; color: var(--neon); margin-bottom: 5px;">[ VOID_SENTINEL_V25 ]</div>
+            <div style="font-weight: bold; letter-spacing: 2px; color: var(--neon); margin-bottom: 5px;">[ VOID_SENTINEL_V26 ]</div>
             <div id="chat-log"></div>
         </div>
 
@@ -73,23 +78,22 @@
             <div id="login-scr" class="full-overlay">
                 <div class="terminal-box">
                     <h1>VOID SENTINEL</h1>
-                    <p style="font-size: 10px; color: #444; letter-spacing: 4px;">CALIBRATED FOR 1080P</p>
+                    <p style="font-size: 10px; color: #444; letter-spacing: 4px;">OPERATOR DATA LINK ACTIVE</p>
                     
                     <div id="auth-form">
                         <input type="text" id="opID" placeholder="INPUT OPERATOR ID" maxlength="12">
                         <br>
                         <button onclick="authOperator()">AUTHENTICATE</button>
                         <br><br>
-                        <button onclick="toggleRules()" style="font-size: 0.6rem; border-color: #333; color: #666;">TACTICAL RULES</button>
+                        <button onclick="toggleRules()" style="font-size: 0.6rem; border-color: #333; color: #666;">VIEW TACTICAL RULES</button>
                     </div>
 
                     <div id="rules-box">
-                        <div style="margin-bottom:10px;"><span style="color:var(--info)">[CONTROLS]</span> Mouse: Fire. 1-4: Weapons. Space: Nova.</div>
+                        <div style="margin-bottom:10px;"><span style="color:var(--info)">[CONTROLS]</span> Click Mouse: Fire. 1-4: Weapons. Space: Nova.</div>
                         <div><div class="color-ref" style="background:#0f4"></div> GREEN (+1): Failure on floor.</div>
-                        <div><div class="color-ref" style="background:#f00"></div> RED (-10): Virus. Drains score.</div>
-                        <div><div class="color-ref" style="background:#ffd700"></div> GOLD (+5): Nova energy boost.</div>
-                        <div><div class="color-ref" style="background:var(--shield)"></div> BLUE: Grants AEGIS Shield.</div>
-                        <div><div class="color-ref" style="background:#ff00ff"></div> PURPLE (+20): Fighter (Hell Mode).</div>
+                        <div><div class="color-ref" style="background:#f00"></div> RED (-10): Virus impact.</div>
+                        <div><div class="color-ref" style="background:#ffd700"></div> GOLD (+5): Super-Nova surge.</div>
+                        <div><div class="color-ref" style="background:var(--shield)"></div> BLUE: Grants AEGIS Shield protection.</div>
                         <button onclick="toggleRules()" style="width:100%; margin-top: 15px; border-color: #444;">BACK</button>
                     </div>
 
@@ -126,7 +130,7 @@
             <div id="breach-scr" class="full-overlay" style="display:none;">
                 <div class="terminal-box" style="border-color: var(--danger);">
                     <h1 style="color: var(--danger);">BREACH</h1>
-                    <p>FINAL SCORE: <span id="final-score">0</span></p>
+                    <p>SCORE: <span id="final-score">0</span></p>
                     <button onclick="launchGrid()">REBOOT</button>
                     <button onclick="location.reload()">LOGOUT</button>
                 </div>
@@ -162,10 +166,10 @@
         }
 
         const DIFF_CONFIG = {
-            EASY:   { speed: 0.5, spawn: 70, bossHp: 1000, target: 10000, rank: "GRAND WARDEN" },
-            NORMAL: { speed: 0.8, spawn: 50, bossHp: 2000, target: 20000, rank: "VOID COMMANDER" },
-            HARD:   { speed: 1.2, spawn: 30, bossHp: 4000, target: 30000, rank: "STRIKE OVERLORD" },
-            HELL:   { speed: 2.2, spawn: 16, bossHp: 10000, target: 50000, rank: "VOID MASTER (OMEGA)", fighters: true }
+            EASY:   { speedMult: 0.0015, spawnRate: 75, bossHp: 1000, target: 10000, rank: "GRAND WARDEN" },
+            NORMAL: { speedMult: 0.0025, spawnRate: 55, bossHp: 2000, target: 20000, rank: "VOID COMMANDER" },
+            HARD:   { speedMult: 0.0045, spawnRate: 35, bossHp: 4000, target: 30000, rank: "STRIKE OVERLORD" },
+            HELL:   { speedMult: 0.0080, spawnRate: 18, bossHp: 10000, target: 50000, rank: "VOID MASTER (OMEGA)", fighters: true }
         };
 
         const RANK_TITLES = ["RECRUIT", "SENTINEL", "VETERAN", "GUARDIAN", "ELITE", "TITAN SLAYER"];
@@ -182,12 +186,13 @@
             document.getElementById('ready-zone').style.display = 'block';
             document.getElementById('op-name').innerText = opName;
             
-            // Fixed Storage Key
-            const pb = localStorage.getItem('VS_PB_' + opName) || 0;
-            document.getElementById('op-pb-val').innerText = pb;
+            // PRIORITY MEMORY RECOVERY
+            const savedPB = localStorage.getItem('VS_PB_' + opName) || 0;
+            document.getElementById('op-pb-val').innerText = savedPB;
             
             checkRushStatus();
             playSound(800, 'sine', 0.2, 0.1);
+            addLog("SYS", "IDENTIFIED: " + opName);
         }
 
         function checkRushStatus() {
@@ -211,10 +216,12 @@
             canvas.width = view.clientWidth * dpr;
             canvas.height = view.clientHeight * dpr;
             ctx.scale(dpr, dpr);
+            
             document.getElementById('login-scr').style.display = 'none';
             document.getElementById('breach-scr').style.display = 'none';
             document.getElementById('hud').style.display = 'flex';
             document.getElementById('weapon-deck').style.display = 'flex';
+            
             resetSystem();
             isLive = true; runEngine();
             playSound(100, 'sawtooth', 0.6, 0.2, 800);
@@ -232,7 +239,7 @@
             constructor(sx, sy, tx, ty, type) {
                 this.x = sx; this.y = sy; this.type = type;
                 const angle = Math.atan2(ty - sy, tx - sx);
-                let speed = (type === 2) ? 12 : (type === 4 ? 18 : 40);
+                let speed = (type === 2) ? 12 : (type === 4 ? 18 : 42);
                 this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
             }
             update() {
@@ -253,16 +260,16 @@
             checkColl() {
                 for (let i = 0; i < blocks.length; i++) {
                     let b = blocks[i];
-                    if (Math.abs(this.x - (b.x+15)) < 26 && Math.abs(this.y - (b.y+15)) < 26) {
-                        if (b.type === 'penalty') score -= 10;
-                        else if (b.type === 'bonus') { score += 5; charge = Math.min(100, charge + 15); }
-                        else if (b.type === 'shield') { hasShield = true; shieldStat.innerText = "SHIELD: ACTIVE"; playSound(1000, 'sine', 0.5, 0.1, 500); }
-                        else { score += 1; charge = Math.min(100, charge + 2); }
+                    if (Math.abs(this.x - (b.x+15)) < 28 && Math.abs(this.y - (b.y+15)) < 28) {
+                        if (b.type === 'penalty') { score -= 10; playSound(80, 'sine', 0.3, 0.2); }
+                        else if (b.type === 'bonus') { score += 5; charge = Math.min(100, charge + 15); playSound(1200, 'sine', 0.4, 0.1); }
+                        else if (b.type === 'shield') { hasShield = true; shieldStat.innerText = "SHIELD: ACTIVE"; playSound(1000, 'sine', 0.5, 0.2); }
+                        else { score += 1; charge = Math.min(100, charge + 2); playSound(600, 'square', 0.05, 0.05); }
                         blocks.splice(i, 1); burst(this.x, this.y, b.type==='penalty'?'#f00':(b.type==='shield'?'#07f':'#0f4')); updateProgression(); return true;
                     }
                 }
                 if (boss && this.x > boss.x && this.x < boss.x + boss.width && this.y > boss.y && this.y < boss.y + boss.height) {
-                    boss.hp -= (this.type === 2 ? 50 : 8); playSound(200, 'sawtooth', 0.05, 0.1); return true;
+                    boss.hp -= (this.type === 2 ? 60 : 10); playSound(200, 'sawtooth', 0.05, 0.1); return true;
                 }
                 return false;
             }
@@ -272,8 +279,14 @@
         function updateProgression() {
             const cfg = DIFF_CONFIG[currentDiff];
             hudScore.innerText = score; novaFill.style.width = charge + "%";
+            
+            // PB STORAGE LOCK
+            const currentPB = parseInt(localStorage.getItem('VS_PB_' + opName) || 0);
+            if (score > currentPB) localStorage.setItem('VS_PB_' + opName, score);
+
             if (score < 0) sidebar.classList.add('glitch-active'); else sidebar.classList.remove('glitch-active');
             hudRank.innerText = RANK_TITLES[Math.min(Math.floor((Math.max(0, score)/cfg.target) * 6), 5)];
+            
             if (score >= cfg.target && !isBossRush) { 
                 const clears = JSON.parse(localStorage.getItem('VS_CLEARS_' + opName) || '{}');
                 clears[currentDiff] = true; localStorage.setItem('VS_CLEARS_' + opName, JSON.stringify(clears));
@@ -288,6 +301,7 @@
         }
 
         function burst(x, y, c) { for(let i=0; i<10; i++) fx.push({ x, y, vx:(Math.random()-0.5)*15, vy:(Math.random()-0.5)*15, a:1, update(){ this.x+=this.vx; this.y+=this.vy; this.a-=0.05; return this.a>0; }, draw(){ ctx.globalAlpha=this.a; ctx.fillStyle=c; ctx.fillRect(this.x,this.y,3,3); ctx.globalAlpha=1; } }); }
+        function addLog(u, m) { const d = document.createElement('div'); d.className = 'log-entry'; d.innerHTML = `<span class="log-user">${u}:</span> ${m}`; chatLog.prepend(d); if(chatLog.childNodes.length > 15) chatLog.lastChild.remove(); }
 
         function runEngine() {
             if (!isLive) return;
@@ -295,20 +309,23 @@
             const w = canvas.width / window.devicePixelRatio, h = canvas.height / window.devicePixelRatio;
             ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,w,h);
             ctx.fillStyle = '#0f4'; ctx.fillRect(0, h - GROUND, w, GROUND);
-            if (hasShield) { ctx.strokeStyle = '#07f'; ctx.lineWidth = 4; ctx.strokeRect(0, h-GROUND, w, GROUND); }
+            if (hasShield) { ctx.strokeStyle = '#07f'; ctx.lineWidth = 6; ctx.strokeRect(2, h-GROUND+2, w-4, GROUND-4); }
 
             frame++;
-            if (!isBossRush && frame % cfg.spawn === 0) {
+            if (!isBossRush && frame % cfg.spawnRate === 0) {
                 let r = Math.random();
-                let type = r < 0.25 ? 'penalty' : (r > 0.98 ? 'shield' : (r > 0.9 ? 'bonus' : 'standard'));
-                blocks.push({ x: Math.random()*(w-30), y:-50, type, speed: 2.8 * cfg.speed });
+                let type = r < 0.25 ? 'penalty' : (r > 0.98 ? 'shield' : (r > 0.90 ? 'bonus' : 'standard'));
+                blocks.push({ x: Math.random()*(w-30), y:-50, type, speed: h * cfg.speedMult });
             }
 
             blocks = blocks.filter(b => {
                 b.y += b.speed;
                 if (b.y > h - GROUND) { 
                     if(b.type === 'standard' || b.type === 'bonus' || b.type === 'shield') { 
-                        if (hasShield) { hasShield = false; shieldStat.innerText = "SHIELD: OFF"; playSound(200, 'sine', 0.5, 0.2); return false; }
+                        if (hasShield) { 
+                            hasShield = false; shieldStat.innerText = "SHIELD: OFF"; playSound(200, 'sine', 0.6, 0.3); 
+                            addLog("SYS", "AEGIS SHIELD DEPLETED"); return false; 
+                        }
                         isLive=false; document.getElementById('breach-scr').style.display='flex'; document.getElementById('final-score').innerText=score; 
                     } return false; 
                 }
@@ -336,8 +353,10 @@
             const cx = w/2, by = h - GROUND;
             if (activeWep === 3) { for(let i=-1; i<=1; i++) projectiles.push(new Missile(cx, by, mx + (i*100), my, 3)); } 
             else projectiles.push(new Missile(cx, by, mx, my, activeWep));
-            playSound(activeWep === 2 ? 150 : 700, 'square', 0.1, 0.06);
+            playSound(activeWep === 2 ? 140 : 750, 'square', 0.1, 0.06);
         });
+
+        window.addEventListener('resize', () => { if(isLive) launchGrid(); });
     </script>
 </body>
 </html>
