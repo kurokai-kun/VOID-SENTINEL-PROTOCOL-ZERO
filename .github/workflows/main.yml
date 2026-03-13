@@ -1,0 +1,45 @@
+name: Project Build and Artifact Secure
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+# 1. OPT-IN TO NODE 24 IMMEDIATELY
+# This silences the deprecation warnings and ensures 2026 security compliance.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  build_and_archive:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 2. CHECKOUT SOURCE CODE
+      # Uses v4 (or v5 if released) - forced to Node 24 by the global env above.
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 3. SETUP NODE.JS ENVIRONMENT
+      - name: Use Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      # 4. INSTALL & BUILD
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Build
+        run: npm run build --if-present
+
+      # 5. UPLOAD ARTIFACTS
+      # This saves your build folder (e.g., 'dist' or 'build') to GitHub.
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-build
+          path: build/ # Change this to 'dist/' if you use Vite or others
+          retention-days: 5 # Good practice to keep artifacts from piling up
