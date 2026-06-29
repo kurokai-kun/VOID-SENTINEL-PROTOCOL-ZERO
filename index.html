@@ -1,362 +1,731 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VOID SENTINEL: PROTOCOL ZERO</title>
-    <style>
-        :root { 
-            --neon: #00ff41; --danger: #ff0000; --info: #00ffff; 
-            --gold: #ffd700; --mutation: #ff00ff; --super: #ffffff; --shield: #0077ff;
-        }
-        body { margin: 0; background: #000; color: var(--neon); font-family: 'Courier New', monospace; overflow: hidden; display: flex; width: 100vw; height: 100vh; user-select: none; }
-        #main-frame { display: flex; width: 100%; height: 100%; }
-        
-        /* SIDEBAR */
-        #sidebar { 
-            width: 280px; background: #080808; border-right: 1px solid var(--neon); 
-            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; 
-            z-index: 50; transition: filter 0.1s; 
-        }
-        .glitch-active { animation: comms-jitter 0.1s infinite; filter: hue-rotate(180deg) brightness(2) contrast(3); border-right-color: var(--danger) !important; }
-        @keyframes comms-jitter { 0% { transform: translate(0); } 33% { transform: translate(-3px, 2px); } 66% { transform: translate(3px, -2px); } 100% { transform: translate(0); } }
-        
-        #chat-log { flex-grow: 1; overflow: hidden; display: flex; flex-direction: column-reverse; font-size: 0.75rem; color: #666; margin-top: 15px; border-top: 1px solid #222; }
-        .log-entry { margin-bottom: 8px; border-left: 2px solid #333; padding-left: 10px; }
-        .log-user { color: var(--info); font-weight: bold; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>VOID SENTINEL: PROTOCOL ZERO</title>
+<style>
+  :root {
+    --neon:#00ff41;--danger:#ff0000;--info:#00ffff;
+    --gold:#ffd700;--mutation:#ff00ff;--super:#ffffff;--shield:#0077ff;
+    --bg:#000;--panel-bg:rgba(0,0,0,0.92);
+    --sidebar-w:220px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--neon);font-family:'Courier New',monospace;}
+  body{display:flex;}
 
-        /* VIEWPORT */
-        #viewport { flex-grow: 1; position: relative; background: #000; overflow: hidden; display: flex; }
-        canvas { display: block; cursor: crosshair; width: 100%; height: 100%; }
-        
-        /* HUD */
-        #hud { position: absolute; top: 20px; width: 96%; left: 2%; display: none; justify-content: space-between; pointer-events: none; z-index: 40; }
-        .panel { background: rgba(0,0,0,0.95); border: 1px solid var(--neon); padding: 10px 15px; text-transform: uppercase; font-size: 0.8rem; pointer-events: none; }
-        #nova-bar { width: 120px; height: 10px; border: 1px solid var(--super); margin-top: 5px; background: #111; }
-        #nova-fill { width: 0%; height: 100%; background: var(--super); box-shadow: 0 0 15px var(--super); }
+  /* ── SIDEBAR ── */
+  #sidebar{
+    width:var(--sidebar-w);min-width:var(--sidebar-w);
+    background:#060606;border-right:1px solid var(--neon);
+    display:flex;flex-direction:column;padding:14px 12px;
+    z-index:50;transition:filter .08s,transform .1s;
+    overflow:hidden;
+  }
+  #sidebar-title{font-weight:bold;letter-spacing:2px;font-size:.72rem;color:var(--neon);margin-bottom:10px;}
+  #chat-log{flex:1;overflow:hidden;display:flex;flex-direction:column-reverse;font-size:.68rem;color:#555;margin-top:10px;border-top:1px solid #1a1a1a;padding-top:6px;}
+  .log-entry{margin-bottom:6px;border-left:2px solid #222;padding-left:7px;line-height:1.35;word-break:break-word;}
+  .log-user{color:var(--info);font-weight:bold;}
 
-        #weapon-deck { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: none; gap: 10px; z-index: 40; }
-        .wep-btn { padding: 8px 15px; border: 1px solid #333; color: #444; font-size: 0.7rem; background: #000; }
-        .wep-btn.active { border-color: var(--neon); color: var(--neon); box-shadow: 0 0 15px var(--neon); }
+  .glitch-active{animation:cj .09s infinite;filter:hue-rotate(180deg) brightness(2) contrast(3);border-right-color:var(--danger)!important;}
+  @keyframes cj{0%{transform:translate(0)}33%{transform:translate(-3px,2px)}66%{transform:translate(3px,-2px)}100%{transform:translate(0)}}
 
-        /* SCREENS */
-        .full-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .terminal-box { border: 1px solid var(--neon); padding: 40px; background: #000; text-align: center; width: 540px; max-height: 95vh; overflow-y: auto; box-shadow: 0 0 40px rgba(0,255,65,0.1); }
-        h1 { font-size: 2.2rem; letter-spacing: 10px; margin: 0 0 10px 0; color: var(--neon); text-shadow: 0 0 15px var(--neon); }
-        input { background: transparent; border: 1px solid var(--neon); color: var(--neon); padding: 15px; width: 100%; box-sizing: border-box; margin: 20px 0; text-align: center; font-family: inherit; font-size: 1.1rem; outline: none; }
-        button { background: transparent; color: var(--neon); border: 1px solid var(--neon); padding: 12px 25px; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: 0.3s; margin: 5px; }
-        button:hover:not(:disabled) { background: var(--neon); color: #000; box-shadow: 0 0 20px var(--neon); }
-        button:disabled { border-color: #222; color: #222; cursor: not-allowed; }
+  /* ── VIEWPORT ── */
+  #viewport{flex:1;position:relative;background:#000;overflow:hidden;display:flex;min-width:0;}
+  canvas{display:block;position:absolute;top:0;left:0;width:100%;height:100%;touch-action:none;}
 
-        .diff-row { display: flex; justify-content: center; gap: 8px; margin: 15px 0; }
-        .diff-btn { padding: 8px 10px; font-size: 0.65rem; border: 1px solid #333; cursor: pointer; color: #555; }
-        .diff-btn.selected { border-color: var(--neon); color: var(--neon); }
-        
-        .diff-btn[data-mode="HELL"] { border-color: #500; color: #500; }
-        .diff-btn[data-mode="HELL"].selected { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 10px var(--danger); }
-        
-        #boss-rush-btn { display: block; width: 100%; margin-top: 15px; border-color: #500; color: #500; font-weight: bold; }
-        #boss-rush-btn.unlocked { border-color: var(--danger); color: var(--danger); animation: danger-pulse 1.5s infinite; cursor: pointer; }
-        @keyframes danger-pulse { 0% { box-shadow: 0 0 2px var(--danger); } 50% { box-shadow: 0 0 15px var(--danger); } 100% { box-shadow: 0 0 2px var(--danger); } }
+  /* ── HUD ── */
+  #hud{position:absolute;top:10px;left:10px;right:10px;display:none;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:40;gap:6px;}
+  .panel{background:var(--panel-bg);border:1px solid var(--neon);padding:7px 11px;text-transform:uppercase;font-size:.72rem;line-height:1.4;white-space:nowrap;}
+  #nova-bar{width:100px;height:8px;border:1px solid var(--super);margin-top:4px;background:#111;}
+  #nova-fill{width:0%;height:100%;background:var(--super);box-shadow:0 0 10px var(--super);transition:width .1s;}
 
-        #rules-box { display: none; text-align: left; font-size: 0.8rem; color: #aaa; margin-top: 15px; border-top: 1px solid #222; padding-top: 15px; }
-        .color-ref { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border: 1px solid #fff; }
+  /* ── WEAPON DECK ── */
+  #weapon-deck{position:absolute;bottom:0;left:0;right:0;display:none;justify-content:center;gap:4px;padding:6px;z-index:40;background:rgba(0,0,0,.7);}
+  .wep-btn{padding:7px 10px;border:1px solid #2a2a2a;color:#3a3a3a;font-size:.65rem;font-family:'Courier New',monospace;background:#000;cursor:pointer;text-transform:uppercase;transition:border-color .15s,color .15s;flex:1;max-width:90px;text-align:center;}
+  .wep-btn.active{border-color:var(--neon);color:var(--neon);box-shadow:0 0 10px var(--neon);}
+  .wep-btn:nth-child(4){color:var(--mutation);border-color:#441144;}
+  .wep-btn.active:nth-child(4){border-color:var(--mutation);box-shadow:0 0 10px var(--mutation);}
 
-        #boss-bar-container { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 400px; height: 15px; border: 1px solid var(--danger); display: none; background: #111; z-index: 30; }
-        #boss-hp { width: 100%; height: 100%; background: var(--danger); transition: width 0.1s; }
-    </style>
+  /* ── OVERLAYS ── */
+  .full-overlay{position:absolute;inset:0;background:#000;display:flex;justify-content:center;align-items:center;z-index:100;overflow-y:auto;padding:10px;}
+  .terminal-box{border:1px solid var(--neon);padding:28px 24px;background:#000;text-align:center;width:min(520px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 0 40px rgba(0,255,65,.08);}
+  h1{font-size:clamp(1.4rem,5vw,2.1rem);letter-spacing:clamp(4px,2vw,10px);margin:0 0 8px;color:var(--neon);text-shadow:0 0 12px var(--neon);}
+  input{background:transparent;border:1px solid var(--neon);color:var(--neon);padding:12px;width:100%;margin:16px 0;text-align:center;font-family:inherit;font-size:clamp(.9rem,3vw,1.05rem);outline:none;border-radius:0;}
+  input::placeholder{color:#333;}
+  button{background:transparent;color:var(--neon);border:1px solid var(--neon);padding:10px 20px;cursor:pointer;text-transform:uppercase;font-family:inherit;font-size:.8rem;transition:background .2s,color .2s,box-shadow .2s;margin:4px;border-radius:0;-webkit-appearance:none;}
+  button:hover:not(:disabled),button:focus:not(:disabled){background:var(--neon);color:#000;box-shadow:0 0 18px var(--neon);}
+  button:disabled{border-color:#1a1a1a;color:#1a1a1a;cursor:not-allowed;}
+
+  .diff-row{display:flex;justify-content:center;gap:6px;margin:12px 0;flex-wrap:wrap;}
+  .diff-btn{padding:7px 9px;font-size:.62rem;border:1px solid #2a2a2a;cursor:pointer;color:#444;font-family:inherit;background:#000;text-transform:uppercase;transition:.15s;}
+  .diff-btn.selected{border-color:var(--neon);color:var(--neon);}
+  .diff-btn[data-mode="HELL"]{border-color:#3a0000;color:#3a0000;}
+  .diff-btn[data-mode="HELL"].selected{border-color:var(--danger);color:var(--danger);box-shadow:0 0 8px var(--danger);}
+
+  #boss-rush-btn{display:block;width:100%;margin-top:12px;border-color:#300;color:#300;font-weight:bold;}
+  #boss-rush-btn.unlocked{border-color:var(--danger);color:var(--danger);animation:dpulse 1.5s infinite;cursor:pointer;}
+  @keyframes dpulse{0%,100%{box-shadow:0 0 2px var(--danger)}50%{box-shadow:0 0 14px var(--danger)}}
+
+  #rules-box{display:none;text-align:left;font-size:.75rem;color:#999;margin-top:12px;border-top:1px solid #1a1a1a;padding-top:12px;line-height:1.7;}
+  .color-ref{display:inline-block;width:10px;height:10px;margin-right:5px;border:1px solid #555;vertical-align:middle;}
+
+  #boss-bar-container{position:absolute;top:70px;left:50%;transform:translateX(-50%);width:min(400px,80%);height:12px;border:1px solid var(--danger);display:none;background:#0a0000;z-index:30;}
+  #boss-hp{width:100%;height:100%;background:var(--danger);transition:width .08s;}
+
+  /* ── VICTORY SCREEN ── */
+  #victory-scr{display:none;}
+  #victory-scr .terminal-box{border-color:var(--gold);}
+
+  /* ── MOBILE TOUCH CONTROLS ── */
+  #touch-aim{display:none;position:absolute;bottom:70px;left:0;right:0;height:55%;z-index:35;touch-action:none;}
+
+  /* ── RESPONSIVE: hide sidebar on narrow screens ── */
+  @media(max-width:600px){
+    #sidebar{display:none;}
+    :root{--sidebar-w:0px;}
+    #hud{top:6px;left:6px;right:6px;}
+    .panel{padding:5px 8px;font-size:.65rem;}
+    #nova-bar{width:70px;}
+  }
+  @media(max-width:380px){
+    h1{letter-spacing:3px;}
+    .terminal-box{padding:18px 14px;}
+  }
+  @media(hover:none) and (pointer:coarse){
+    /* touch device: show tap area, larger hit targets */
+    #touch-aim{display:block;}
+    .wep-btn{padding:10px 8px;font-size:.6rem;}
+  }
+
+  /* ── NOVA READY FLASH ── */
+  @keyframes nova-ready{0%,100%{box-shadow:0 0 5px var(--super)}50%{box-shadow:0 0 25px var(--super),0 0 50px var(--super)}}
+  .nova-charged #nova-bar{animation:nova-ready 0.8s infinite;}
+</style>
 </head>
 <body>
+<div id="sidebar">
+  <div id="sidebar-title">[ VOID_SENTINEL_V26 ]</div>
+  <div id="chat-log"></div>
+</div>
 
-    <div id="main-frame">
-        <div id="sidebar">
-            <div style="font-weight: bold; letter-spacing: 2px; color: var(--neon); margin-bottom: 5px;">[ VOID_SENTINEL_V26 ]</div>
-            <div id="chat-log"></div>
+<div id="viewport">
+  <!-- LOGIN -->
+  <div id="login-scr" class="full-overlay">
+    <div class="terminal-box">
+      <h1>VOID SENTINEL</h1>
+      <p style="font-size:.62rem;color:#333;letter-spacing:3px;margin:0 0 4px;">OPERATOR DATA LINK ACTIVE</p>
+      <div id="auth-form">
+        <input type="text" id="opID" placeholder="INPUT OPERATOR ID" maxlength="12" autocomplete="off" spellcheck="false">
+        <button onclick="authOperator()">AUTHENTICATE</button><br><br>
+        <button onclick="toggleRules()" style="font-size:.58rem;border-color:#2a2a2a;color:#444;">VIEW TACTICAL RULES</button>
+      </div>
+      <div id="rules-box">
+        <div><span style="color:var(--info)">[CONTROLS]</span> Click/Tap: Fire &nbsp;|&nbsp; 1–4 or Buttons: Weapons &nbsp;|&nbsp; Space/Nova Btn: Super-Nova</div><br>
+        <div><span class="color-ref" style="background:#0f4"></span> GREEN (+1) — Destroy on field</div>
+        <div><span class="color-ref" style="background:#f00"></span> RED (−10) — Virus impact</div>
+        <div><span class="color-ref" style="background:#ffd700"></span> GOLD (+5) — Super-Nova surge</div>
+        <div><span class="color-ref" style="background:var(--shield)"></span> BLUE — AEGIS Shield granted</div>
+        <button onclick="toggleRules()" style="width:100%;margin-top:14px;border-color:#333;">BACK</button>
+      </div>
+      <div id="ready-zone" style="display:none;">
+        <p style="color:var(--info);margin:6px 0;">OP: <span id="op-name"></span></p>
+        <p style="color:var(--gold);font-size:.78rem;margin:4px 0;">Personal Best: <span id="op-pb-val">0</span></p>
+        <div class="diff-row">
+          <div class="diff-btn" id="btn-EASY"   onclick="setDiff('EASY',this)">EASY</div>
+          <div class="diff-btn selected" id="btn-NORMAL" onclick="setDiff('NORMAL',this)">NORMAL</div>
+          <div class="diff-btn" id="btn-HARD"   onclick="setDiff('HARD',this)">HARD</div>
+          <div class="diff-btn" data-mode="HELL" id="btn-HELL" onclick="setDiff('HELL',this)">HELL</div>
         </div>
-
-        <div id="viewport">
-            <div id="login-scr" class="full-overlay">
-                <div class="terminal-box">
-                    <h1>VOID SENTINEL</h1>
-                    <p style="font-size: 10px; color: #444; letter-spacing: 4px;">OPERATOR DATA LINK ACTIVE</p>
-                    
-                    <div id="auth-form">
-                        <input type="text" id="opID" placeholder="INPUT OPERATOR ID" maxlength="12">
-                        <br>
-                        <button onclick="authOperator()">AUTHENTICATE</button>
-                        <br><br>
-                        <button onclick="toggleRules()" style="font-size: 0.6rem; border-color: #333; color: #666;">VIEW TACTICAL RULES</button>
-                    </div>
-
-                    <div id="rules-box">
-                        <div style="margin-bottom:10px;"><span style="color:var(--info)">[CONTROLS]</span> Click Mouse: Fire. 1-4: Weapons. Space: Nova.</div>
-                        <div><div class="color-ref" style="background:#0f4"></div> GREEN (+1): Failure on floor.</div>
-                        <div><div class="color-ref" style="background:#f00"></div> RED (-10): Virus impact.</div>
-                        <div><div class="color-ref" style="background:#ffd700"></div> GOLD (+5): Super-Nova surge.</div>
-                        <div><div class="color-ref" style="background:var(--shield)"></div> BLUE: Grants AEGIS Shield protection.</div>
-                        <button onclick="toggleRules()" style="width:100%; margin-top: 15px; border-color: #444;">BACK</button>
-                    </div>
-
-                    <div id="ready-zone" style="display:none;">
-                        <p style="color: var(--info);">OP: <span id="op-name"></span></p>
-                        <p style="color: var(--gold); font-size: 0.8rem;">Personal Best: <span id="op-pb-val">0</span></p>
-                        <div class="diff-row">
-                            <div class="diff-btn" id="btn-EASY" onclick="setDiff('EASY', this)">EASY</div>
-                            <div class="diff-btn selected" id="btn-NORMAL" onclick="setDiff('NORMAL', this)">NORMAL</div>
-                            <div class="diff-btn" id="btn-HARD" onclick="setDiff('HARD', this)">HARD</div>
-                            <div class="diff-btn" data-mode="HELL" id="btn-HELL" onclick="setDiff('HELL', this)">HELL</div>
-                        </div>
-                        <button onclick="launchGrid()">ENGAGE GRID</button>
-                        <button id="boss-rush-btn" disabled onclick="startBossRush()">BOSS RUSH [LOCKED]</button>
-                    </div>
-                </div>
-            </div>
-
-            <div id="hud">
-                <div class="panel"><span id="hud-rank" style="color:var(--gold)">RECRUIT</span> | <span id="shield-stat" style="color:var(--shield)">SHIELD: OFF</span></div>
-                <div class="panel">SUPER-NOVA<div id="nova-bar"><div id="nova-fill"></div></div></div>
-                <div class="panel">SCORE: <span id="hud-score">0</span></div>
-            </div>
-
-            <div id="weapon-deck">
-                <div id="w1" class="wep-btn active">1: RAPID</div>
-                <div id="w2" class="wep-btn">2: HEAVY</div>
-                <div id="w3" class="wep-btn">3: PULSE</div>
-                <div id="w4" class="wep-btn" style="color:var(--mutation)">4: STRIKER</div>
-            </div>
-
-            <div id="boss-bar-container"><div id="boss-hp"></div></div>
-
-            <div id="breach-scr" class="full-overlay" style="display:none;">
-                <div class="terminal-box" style="border-color: var(--danger);">
-                    <h1 style="color: var(--danger);">BREACH</h1>
-                    <p>SCORE: <span id="final-score">0</span></p>
-                    <button onclick="launchGrid()">REBOOT</button>
-                    <button onclick="location.reload()">LOGOUT</button>
-                </div>
-            </div>
-
-            <canvas id="canvas"></canvas>
-        </div>
+        <button onclick="launchGrid()">ENGAGE GRID</button>
+        <button id="boss-rush-btn" disabled onclick="startBossRush()">BOSS RUSH [LOCKED]</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
-        const hudScore = document.getElementById('hud-score'), hudRank = document.getElementById('hud-rank');
-        const novaFill = document.getElementById('nova-fill'), chatLog = document.getElementById('chat-log');
-        const bossBar = document.getElementById('boss-bar-container'), bossHpFill = document.getElementById('boss-hp');
-        const sidebar = document.getElementById('sidebar'), shieldStat = document.getElementById('shield-stat');
-        
-        let opName = "", score = 0, isLive = false, frame = 0, activeWep = 1;
-        let blocks = [], projectiles = [], fx = [], fighters = [], boss = null;
-        let charge = 0, loopId = null, currentDiff = "NORMAL", isBossActive = false, isBossRush = false, hasShield = false;
-        const GROUND = 30;
+  <!-- BREACH -->
+  <div id="breach-scr" class="full-overlay" style="display:none;">
+    <div class="terminal-box" style="border-color:var(--danger);">
+      <h1 style="color:var(--danger);">BREACH</h1>
+      <p>SCORE: <span id="final-score">0</span></p>
+      <button onclick="launchGrid()">REBOOT</button>
+      <button onclick="location.reload()">LOGOUT</button>
+    </div>
+  </div>
 
-        let audioCtx = null;
-        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-        function playSound(freq, type, duration, volume, slide = 0) {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator(); const g = audioCtx.createGain();
-            osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            if (slide) osc.frequency.exponentialRampToValueAtTime(slide, audioCtx.currentTime + duration);
-            g.gain.setValueAtTime(volume, audioCtx.currentTime);
-            g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
-            osc.connect(g); g.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + duration);
+  <!-- VICTORY -->
+  <div id="victory-scr" class="full-overlay" style="display:none;">
+    <div class="terminal-box" style="border-color:var(--gold);">
+      <h1 style="color:var(--gold);">VICTORY</h1>
+      <p style="color:var(--gold);letter-spacing:3px;font-size:.8rem;" id="max-rank-title"></p>
+      <p>SCORE: <span id="victory-score">0</span></p>
+      <button onclick="launchGrid()">PLAY AGAIN</button>
+      <button onclick="goToMenu()">MAIN MENU</button>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="panel"><span id="hud-rank" style="color:var(--gold)">RECRUIT</span><br><span id="shield-stat" style="color:var(--shield)">SHIELD: OFF</span></div>
+    <div class="panel">SUPER-NOVA<div id="nova-bar"><div id="nova-fill"></div></div></div>
+    <div class="panel">SCORE: <span id="hud-score">0</span></div>
+  </div>
+
+  <!-- BOSS BAR -->
+  <div id="boss-bar-container"><div id="boss-hp"></div></div>
+
+  <!-- WEAPON DECK -->
+  <div id="weapon-deck">
+    <div id="w1" class="wep-btn active" onclick="setWep(1)">1: RAPID</div>
+    <div id="w2" class="wep-btn" onclick="setWep(2)">2: HEAVY</div>
+    <div id="w3" class="wep-btn" onclick="setWep(3)">3: PULSE</div>
+    <div id="w4" class="wep-btn" onclick="setWep(4)">4: STRIKER</div>
+    <div id="wNova" class="wep-btn" id="nova-btn" onclick="fireNova()" style="border-color:#555;color:#555;max-width:80px;">NOVA</div>
+  </div>
+
+  <!-- TOUCH AIM SURFACE -->
+  <div id="touch-aim"></div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+<script>
+'use strict';
+/* ── GLOBALS ── */
+const canvas = document.getElementById('canvas');
+const ctx    = canvas.getContext('2d', {alpha:false});
+const hudScore  = document.getElementById('hud-score');
+const hudRank   = document.getElementById('hud-rank');
+const novaFill  = document.getElementById('nova-fill');
+const chatLog   = document.getElementById('chat-log');
+const bossBar   = document.getElementById('boss-bar-container');
+const bossHpFill= document.getElementById('boss-hp');
+const sidebar   = document.getElementById('sidebar');
+const shieldStat= document.getElementById('shield-stat');
+const hudEl     = document.getElementById('hud');
+const wepDeck   = document.getElementById('weapon-deck');
+const novaBarEl = document.getElementById('nova-bar');
+
+let opName='', score=0, isLive=false, frame=0, activeWep=1;
+let blocks=[], projectiles=[], fx=[], boss=null;
+let charge=0, loopId=null, currentDiff='NORMAL';
+let isBossActive=false, isBossRush=false, hasShield=false;
+let lastTime=0;
+
+/* Device pixel ratio, computed once */
+const DPR = Math.min(window.devicePixelRatio || 1, 2); // cap at 2 for perf
+
+/* Logical viewport dimensions */
+let LW=0, LH=0;
+const GROUND = 32;
+
+/* ── OBJECT POOLS ── */
+const FX_POOL  = [];
+const MISS_POOL= [];
+function getFx()   { return FX_POOL.pop()   || {}; }
+function getMiss() { return MISS_POOL.pop()  || {}; }
+
+/* ── AUDIO ── */
+let audioCtx=null;
+function initAudio(){
+  if(!audioCtx){
+    try{ audioCtx=new(window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  if(audioCtx && audioCtx.state==='suspended') audioCtx.resume();
+}
+function playSound(freq,type,duration,vol,slide=0){
+  if(!audioCtx) return;
+  try{
+    const osc=audioCtx.createOscillator(), g=audioCtx.createGain();
+    osc.type=type; osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+    if(slide) osc.frequency.exponentialRampToValueAtTime(slide,audioCtx.currentTime+duration);
+    g.gain.setValueAtTime(vol,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+duration);
+    osc.connect(g); g.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+duration);
+  }catch(e){}
+}
+
+/* ── DIFFICULTY CONFIG ── */
+const DIFF={
+  EASY  :{speedBase:.0012,spawnRate:80 ,bossHp:1000 ,target:10000,rank:'GRAND WARDEN'    },
+  NORMAL:{speedBase:.0022,spawnRate:56 ,bossHp:2000 ,target:20000,rank:'VOID COMMANDER'  },
+  HARD  :{speedBase:.0040,spawnRate:36 ,bossHp:4000 ,target:30000,rank:'STRIKE OVERLORD' },
+  HELL  :{speedBase:.0075,spawnRate:18 ,bossHp:10000,target:50000,rank:'VOID MASTER (Ω)' }
+};
+const RANKS=['RECRUIT','SENTINEL','VETERAN','GUARDIAN','ELITE','TITAN SLAYER'];
+
+/* ── UI UTILS ── */
+function toggleRules(){
+  const r=document.getElementById('rules-box'), f=document.getElementById('auth-form');
+  const show=r.style.display!=='block';
+  r.style.display=show?'block':'none'; f.style.display=show?'none':'block';
+}
+function goToMenu(){
+  ['breach-scr','victory-scr','hud','weapon-deck'].forEach(id=>{
+    document.getElementById(id).style.display=['hud','weapon-deck'].includes(id)?'none':'none';
+  });
+  wepDeck.style.display='none'; hudEl.style.display='none';
+  document.getElementById('login-scr').style.display='flex';
+}
+function addLog(u,m){
+  const d=document.createElement('div'); d.className='log-entry';
+  d.innerHTML=`<span class="log-user">${u}:</span> ${m}`;
+  chatLog.prepend(d);
+  while(chatLog.childNodes.length>14) chatLog.lastChild.remove();
+}
+
+/* ── AUTH ── */
+function authOperator(){
+  initAudio();
+  opName=document.getElementById('opID').value.trim().toUpperCase()||'OP_SENTINEL';
+  document.getElementById('auth-form').style.display='none';
+  document.getElementById('ready-zone').style.display='block';
+  document.getElementById('op-name').innerText=opName;
+  document.getElementById('op-pb-val').innerText=localStorage.getItem('VS_PB_'+opName)||0;
+  checkRushStatus();
+  playSound(800,'sine',.2,.1);
+  addLog('SYS','IDENTIFIED: '+opName);
+}
+function checkRushStatus(){
+  const c=JSON.parse(localStorage.getItem('VS_CLEARS_'+opName)||'{}');
+  const btn=document.getElementById('boss-rush-btn');
+  if(c.EASY&&c.NORMAL&&c.HARD&&c.HELL){
+    btn.disabled=false; btn.classList.add('unlocked'); btn.innerText='ENGAGE BOSS RUSH';
+  }
+}
+function setDiff(mode,el){
+  currentDiff=mode; isBossRush=false;
+  document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected'); playSound(400,'square',.1,.05);
+}
+function setWep(n){
+  activeWep=n;
+  document.querySelectorAll('.wep-btn').forEach((b,i)=>{
+    if(i<4) b.classList.toggle('active',i+1===n);
+  });
+}
+function startBossRush(){
+  if(document.getElementById('boss-rush-btn').disabled) return;
+  isBossRush=true; launchGrid();
+}
+
+/* ── CANVAS RESIZE ── */
+function resizeCanvas(){
+  const vp=document.getElementById('viewport');
+  LW=vp.clientWidth; LH=vp.clientHeight;
+  canvas.width =Math.round(LW*DPR);
+  canvas.height=Math.round(LH*DPR);
+  canvas.style.width =LW+'px';
+  canvas.style.height=LH+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+
+/* ── LAUNCH ── */
+function launchGrid(){
+  resizeCanvas();
+  document.getElementById('login-scr').style.display='none';
+  document.getElementById('breach-scr').style.display='none';
+  document.getElementById('victory-scr').style.display='none';
+  hudEl.style.display='flex'; wepDeck.style.display='flex';
+  resetSystem(); isLive=true; lastTime=0;
+  loopId=requestAnimationFrame(runEngine);
+  playSound(100,'sawtooth',.6,.2,800);
+  addLog('SYS','GRID ENGAGED — DIFF: '+currentDiff);
+}
+function resetSystem(){
+  if(loopId){ cancelAnimationFrame(loopId); loopId=null; }
+  score=0; frame=0; charge=0; isBossActive=false; hasShield=false;
+  blocks=[]; projectiles=[]; fx=[]; boss=null;
+  hudScore.innerText='0'; novaFill.style.width='0%';
+  shieldStat.innerText='SHIELD: OFF'; shieldStat.style.color='var(--shield)';
+  bossBar.style.display='none';
+  sidebar.classList.remove('glitch-active');
+  hudEl.classList.remove('nova-charged');
+  setWep(1);
+}
+
+/* ── PROJECTILE ── */
+class Missile{
+  constructor(sx,sy,tx,ty,type){
+    this.x=sx; this.y=sy; this.type=type; this.dead=false;
+    const a=Math.atan2(ty-sy,tx-sx);
+    const spd=type===2?14:(type===4?20:44);
+    this.vx=Math.cos(a)*spd; this.vy=Math.sin(a)*spd;
+  }
+  update(){
+    if(this.dead) return false;
+    /* Striker homing */
+    if(this.type===4 && blocks.length){
+      let best=null, bd=99999;
+      for(const b of blocks){ const d=Math.hypot(b.x-this.x,b.y-this.y); if(d<bd){bd=d;best=b;} }
+      if(best){
+        const a=Math.atan2(best.y-this.y,best.x-this.x);
+        this.vx+=Math.cos(a)*3.5; this.vy+=Math.sin(a)*3.5;
+        const m=Math.hypot(this.vx,this.vy); this.vx=this.vx/m*26; this.vy=this.vy/m*26;
+      }
+    }
+    /* Sub-step collision (5 steps) */
+    for(let s=0;s<5;s++){
+      this.x+=this.vx/5; this.y+=this.vy/5;
+      if(this.checkHit()) return false;
+    }
+    return (this.y>-20 && this.x>-20 && this.x<LW+20);
+  }
+  checkHit(){
+    const bx=this.x, by=this.y;
+    for(let i=0;i<blocks.length;i++){
+      const b=blocks[i];
+      if(Math.abs(bx-(b.x+15))<26 && Math.abs(by-(b.y+15))<26){
+        applyBlockHit(b,i,bx,by);
+        this.dead=true; return true;
+      }
+    }
+    if(boss && bx>boss.x && bx<boss.x+boss.w && by>boss.y && by<boss.y+boss.h){
+      boss.hp-=(this.type===2?65:10);
+      playSound(200,'sawtooth',.05,.1);
+      this.dead=true; return true;
+    }
+    return false;
+  }
+  draw(){
+    if(this.type===4){ ctx.fillStyle='#f0f'; ctx.shadowBlur=6; ctx.shadowColor='#f0f'; }
+    else{ ctx.fillStyle='#fff'; ctx.shadowBlur=0; }
+    ctx.fillRect(this.x-2,this.y-2,5,5);
+    ctx.shadowBlur=0;
+  }
+}
+
+function applyBlockHit(b,i,px,py){
+  if(b.type==='penalty'){
+    score-=10; playSound(80,'sine',.3,.2); burst(px,py,'#f00');
+    addLog('WARN','VIRUS IMPACT -10');
+  } else if(b.type==='bonus'){
+    score+=5; charge=Math.min(100,charge+15);
+    playSound(1200,'sine',.35,.12); burst(px,py,'#ffd700');
+  } else if(b.type==='shield'){
+    hasShield=true; shieldStat.innerText='SHIELD: ACTIVE'; shieldStat.style.color='#4af';
+    playSound(1000,'sine',.5,.2); burst(px,py,'#07f');
+    addLog('SYS','AEGIS SHIELD ONLINE');
+  } else {
+    score+=1; charge=Math.min(100,charge+2);
+    playSound(600,'square',.05,.05); burst(px,py,'#0f4');
+  }
+  blocks.splice(i,1);
+  updateHUD();
+}
+
+/* ── PARTICLES ── */
+function burst(x,y,color){
+  const MAX=8;
+  for(let i=0;i<MAX;i++){
+    const p=getFx();
+    p.x=x; p.y=y; p.color=color;
+    p.vx=(Math.random()-.5)*14; p.vy=(Math.random()-.5)*14; p.a=1;
+    fx.push(p);
+  }
+}
+function updateFx(){
+  let i=fx.length;
+  while(i--){
+    const p=fx[i];
+    p.x+=p.vx; p.y+=p.vy; p.a-=.055;
+    if(p.a<=0){ fx.splice(i,1); FX_POOL.push(p); }
+    else{
+      ctx.globalAlpha=p.a; ctx.fillStyle=p.color;
+      ctx.fillRect(p.x-1,p.y-1,4,4);
+    }
+  }
+  ctx.globalAlpha=1;
+}
+
+/* ── NOVA ── */
+function fireNova(){
+  if(charge<100) return;
+  charge=0; novaFill.style.width='0%';
+  hudEl.classList.remove('nova-charged');
+  blocks.length=0;
+  if(boss) boss.hp-=4000;
+  playSound(40,'sawtooth',1.5,.6,2000);
+  addLog('SYS','SUPER-NOVA FIRED');
+  // nova flash
+  const flash=document.createElement('div');
+  flash.style.cssText='position:absolute;inset:0;background:#fff;opacity:.4;pointer-events:none;z-index:38;transition:opacity .4s';
+  document.getElementById('viewport').appendChild(flash);
+  setTimeout(()=>{ flash.style.opacity='0'; setTimeout(()=>flash.remove(),500); },50);
+}
+
+/* ── HUD UPDATE ── */
+function updateHUD(){
+  const cfg=DIFF[currentDiff];
+  hudScore.innerText=score;
+  novaFill.style.width=charge+'%';
+  if(charge>=100) hudEl.classList.add('nova-charged'); else hudEl.classList.remove('nova-charged');
+  const pb=parseInt(localStorage.getItem('VS_PB_'+opName)||0);
+  if(score>pb) localStorage.setItem('VS_PB_'+opName,score);
+  if(score<0) sidebar.classList.add('glitch-active'); else sidebar.classList.remove('glitch-active');
+  hudRank.innerText=RANKS[Math.min(Math.floor((Math.max(0,score)/cfg.target)*6),5)];
+
+  // Boss spawn threshold
+  if(score>=500 && !boss && !isBossActive){
+    isBossActive=true;
+    const hp=isBossRush?5000+score*3:cfg.bossHp;
+    spawnBoss(hp);
+  }
+
+  // Victory check
+  if(score>=cfg.target && !isBossRush && isLive){
+    const clears=JSON.parse(localStorage.getItem('VS_CLEARS_'+opName)||'{}');
+    clears[currentDiff]=true; localStorage.setItem('VS_CLEARS_'+opName,JSON.stringify(clears));
+    endGame('victory');
+  }
+}
+
+/* ── BOSS ── */
+function spawnBoss(hp){
+  boss={
+    x:LW/2-150, y:-100, w:300, h:80,
+    hp, maxHp:hp, dir:1, phase:0, shootTimer:0,
+    update(){
+      if(this.y<60) this.y+=.6;
+      this.x+=2.2*this.dir*(1+(this.phase*.3));
+      if(this.x<0||this.x+this.w>LW){ this.dir*=-1; }
+      bossBar.style.display='block';
+      bossHpFill.style.width=(Math.max(0,this.hp)/this.maxHp*100)+'%';
+      // Phase change at 50% hp
+      if(this.hp<this.maxHp*.5 && this.phase===0){
+        this.phase=1; addLog('WARN','BOSS PHASE 2 — SPEED UP');
+      }
+      // Boss shoots penalty blocks on HELL
+      if(currentDiff==='HELL'){
+        this.shootTimer++;
+        if(this.shootTimer%90===0){
+          blocks.push({x:this.x+this.w/2-15, y:this.y+this.h, type:'penalty', speed:LH*DIFF[currentDiff].speedBase*1.4});
         }
+      }
+      return this.hp>0;
+    },
+    draw(){
+      ctx.fillStyle='#060606'; ctx.strokeStyle='#f00'; ctx.lineWidth=3;
+      ctx.fillRect(this.x,this.y,this.w,this.h);
+      ctx.strokeRect(this.x,this.y,this.w,this.h);
+      // Core glow
+      const grad=ctx.createRadialGradient(this.x+this.w/2,this.y+this.h/2,5,this.x+this.w/2,this.y+this.h/2,80);
+      grad.addColorStop(0,'rgba(255,0,0,.12)'); grad.addColorStop(1,'transparent');
+      ctx.fillStyle=grad; ctx.fillRect(this.x,this.y,this.w,this.h);
+      // HP text
+      ctx.fillStyle='#f00'; ctx.font='bold 11px Courier New'; ctx.textAlign='center';
+      ctx.fillText('ENTITY HP: '+Math.max(0,Math.round(this.hp)),this.x+this.w/2,this.y+this.h/2+4);
+      ctx.textAlign='left';
+    }
+  };
+  addLog('WARN','BOSS ENTITY BREACH — ELIMINATE');
+  playSound(50,'sawtooth',.8,.4,300);
+}
 
-        const DIFF_CONFIG = {
-            EASY:   { speedMult: 0.0015, spawnRate: 75, bossHp: 1000, target: 10000, rank: "GRAND WARDEN" },
-            NORMAL: { speedMult: 0.0025, spawnRate: 55, bossHp: 2000, target: 20000, rank: "VOID COMMANDER" },
-            HARD:   { speedMult: 0.0045, spawnRate: 35, bossHp: 4000, target: 30000, rank: "STRIKE OVERLORD" },
-            HELL:   { speedMult: 0.0080, spawnRate: 18, bossHp: 10000, target: 50000, rank: "VOID MASTER (OMEGA)", fighters: true }
-        };
+/* ── END GAME ── */
+function endGame(result){
+  isLive=false;
+  if(loopId){ cancelAnimationFrame(loopId); loopId=null; }
+  playSound(result==='victory'?800:60, result==='victory'?'sine':'sawtooth', .8, .3, result==='victory'?1200:40);
+  if(result==='breach'){
+    document.getElementById('final-score').innerText=score;
+    document.getElementById('breach-scr').style.display='flex';
+    addLog('SYS','BREACH — SCORE: '+score);
+  } else {
+    document.getElementById('victory-score').innerText=score;
+    document.getElementById('max-rank-title').innerText=DIFF[currentDiff].rank;
+    document.getElementById('victory-scr').style.display='flex';
+    addLog('SYS','VICTORY — RANK: '+DIFF[currentDiff].rank);
+  }
+  bossBar.style.display='none';
+}
 
-        const RANK_TITLES = ["RECRUIT", "SENTINEL", "VETERAN", "GUARDIAN", "ELITE", "TITAN SLAYER"];
+/* ── GRID STAR BG ── */
+const STARS=[];
+(function initStars(){
+  for(let i=0;i<60;i++) STARS.push({x:Math.random(),y:Math.random(),r:Math.random()*.8+.2,a:Math.random()});
+})();
+function drawStars(){
+  for(const s of STARS){
+    s.a+=.005; if(s.a>1) s.a=0;
+    ctx.fillStyle=`rgba(0,255,65,${s.a*.25})`;
+    ctx.fillRect(s.x*LW, s.y*LH, s.r, s.r);
+  }
+}
 
-        function toggleRules() {
-            const r = document.getElementById('rules-box'), f = document.getElementById('auth-form');
-            const s = r.style.display === 'block'; r.style.display = s ? 'none' : 'block'; f.style.display = s ? 'block' : 'none';
+/* ── SCANLINE OVERLAY (drawn once as pattern if supported) ── */
+let scanlinePattern=null;
+function buildScanlines(){
+  const off=document.createElement('canvas');
+  off.width=2; off.height=4;
+  const c=off.getContext('2d');
+  c.fillStyle='rgba(0,0,0,.18)'; c.fillRect(0,2,2,2);
+  try{ scanlinePattern=ctx.createPattern(off,'repeat'); }catch(e){}
+}
+
+/* ── MAIN ENGINE LOOP ── */
+function runEngine(ts){
+  if(!isLive) return;
+  loopId=requestAnimationFrame(runEngine);
+
+  // Delta time cap (prevents spiral of death on tab switch)
+  const dt=Math.min((ts-(lastTime||ts))/16.67,3);
+  lastTime=ts; frame++;
+
+  const cfg=DIFF[currentDiff];
+
+  /* Background */
+  ctx.fillStyle='rgba(0,0,0,.55)';
+  ctx.fillRect(0,0,LW,LH);
+  drawStars();
+
+  /* Ground bar */
+  ctx.fillStyle='#0b2e16';
+  ctx.fillRect(0,LH-GROUND,LW,GROUND);
+  ctx.fillStyle='#0f4'; ctx.fillRect(0,LH-GROUND,LW,2);
+  if(hasShield){
+    ctx.strokeStyle='rgba(0,119,255,.6)'; ctx.lineWidth=4;
+    ctx.strokeRect(3,LH-GROUND+3,LW-6,GROUND-6);
+  }
+
+  /* Scanlines */
+  if(scanlinePattern){
+    ctx.fillStyle=scanlinePattern;
+    ctx.fillRect(0,0,LW,LH);
+  }
+
+  /* Spawn blocks */
+  if(!isBossRush && frame%Math.max(8,Math.round(cfg.spawnRate/dt))===0){
+    const r=Math.random();
+    const type=r<.25?'penalty':(r>.98?'shield':(r>.90?'bonus':'standard'));
+    blocks.push({x:Math.random()*(LW-36)+3, y:-55, type, speed:LH*cfg.speedBase*dt});
+  }
+
+  /* Update & draw blocks */
+  const blockSize=28;
+  let bi=blocks.length;
+  while(bi--){
+    const b=blocks[bi];
+    b.speed=LH*cfg.speedBase*dt;  // recalc each frame for smooth scaling
+    b.y+=b.speed;
+    if(b.y>LH-GROUND){
+      // hit ground
+      if(b.type!=='penalty'){
+        if(hasShield){
+          hasShield=false; shieldStat.innerText='SHIELD: OFF'; shieldStat.style.color='var(--shield)';
+          playSound(200,'sine',.5,.3); addLog('SYS','AEGIS SHIELD DEPLETED');
+          blocks.splice(bi,1); continue;
         }
+        endGame('breach'); return;
+      }
+      blocks.splice(bi,1); continue;
+    }
+    ctx.fillStyle=b.type==='penalty'?'#f00':(b.type==='bonus'?'#cc9900':(b.type==='shield'?'#0066cc':'#0c3a1e'));
+    ctx.strokeStyle=b.type==='penalty'?'#ff5555':(b.type==='bonus'?'#ffd700':(b.type==='shield'?'#07f':'#0f4'));
+    ctx.lineWidth=1.5;
+    ctx.fillRect(b.x,b.y,blockSize,blockSize);
+    ctx.strokeRect(b.x,b.y,blockSize,blockSize);
+    // inner glyph
+    ctx.font='10px Courier New'; ctx.textAlign='center'; ctx.fillStyle=b.type==='penalty'?'#ff8':'#fff';
+    ctx.globalAlpha=.6;
+    ctx.fillText(b.type==='penalty'?'☠':(b.type==='bonus'?'★':(b.type==='shield'?'⬡':'●')),b.x+blockSize/2,b.y+blockSize/2+4);
+    ctx.globalAlpha=1; ctx.textAlign='left';
+  }
 
-        function authOperator() {
-            initAudio();
-            opName = document.getElementById('opID').value.trim().toUpperCase() || "OP_SENTINEL";
-            document.getElementById('auth-form').style.display = 'none';
-            document.getElementById('ready-zone').style.display = 'block';
-            document.getElementById('op-name').innerText = opName;
-            
-            // PRIORITY MEMORY RECOVERY
-            const savedPB = localStorage.getItem('VS_PB_' + opName) || 0;
-            document.getElementById('op-pb-val').innerText = savedPB;
-            
-            checkRushStatus();
-            playSound(800, 'sine', 0.2, 0.1);
-            addLog("SYS", "IDENTIFIED: " + opName);
-        }
+  /* Projectiles */
+  let pi=projectiles.length;
+  while(pi--){
+    if(!projectiles[pi].update()){
+      MISS_POOL.push(projectiles.splice(pi,1)[0]);
+    } else {
+      projectiles[pi].draw();
+    }
+  }
 
-        function checkRushStatus() {
-            const clears = JSON.parse(localStorage.getItem('VS_CLEARS_' + opName) || '{}');
-            const rushBtn = document.getElementById('boss-rush-btn');
-            if (clears.EASY && clears.NORMAL && clears.HARD && clears.HELL) {
-                rushBtn.disabled = false; rushBtn.classList.add('unlocked'); rushBtn.innerText = "ENGAGE BOSS RUSH";
-            }
-        }
+  /* FX */
+  updateFx();
 
-        function setDiff(mode, el) {
-            currentDiff = mode; isBossRush = false;
-            document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
-            el.classList.add('selected');
-            playSound(400, 'square', 0.1, 0.05);
-        }
+  /* Boss */
+  if(boss){
+    if(!boss.update()){
+      boss=null; score+=2000; isBossActive=false;
+      bossBar.style.display='none';
+      addLog('SYS','BOSS ELIMINATED +2000');
+      playSound(1200,'sine',.6,.3,400);
+    } else {
+      boss.draw();
+    }
+  }
 
-        function launchGrid() {
-            const view = document.getElementById('viewport');
-            const dpr = window.devicePixelRatio || 1;
-            canvas.width = view.clientWidth * dpr;
-            canvas.height = view.clientHeight * dpr;
-            ctx.scale(dpr, dpr);
-            
-            document.getElementById('login-scr').style.display = 'none';
-            document.getElementById('breach-scr').style.display = 'none';
-            document.getElementById('hud').style.display = 'flex';
-            document.getElementById('weapon-deck').style.display = 'flex';
-            
-            resetSystem();
-            isLive = true; runEngine();
-            playSound(100, 'sawtooth', 0.6, 0.2, 800);
-        }
+  updateHUD();
+}
 
-        function resetSystem() {
-            if (loopId) cancelAnimationFrame(loopId);
-            score = 0; frame = 0; charge = 0; isBossActive = false; hasShield = false;
-            blocks = []; projectiles = []; fx = []; fighters = []; boss = null;
-            hudScore.innerText = "0"; novaFill.style.width = "0%"; shieldStat.innerText = "SHIELD: OFF";
-            bossBar.style.display = 'none'; sidebar.classList.remove('glitch-active');
-        }
+/* ── INPUT: KEYBOARD ── */
+window.addEventListener('keydown',e=>{
+  if(['1','2','3','4'].includes(e.key)){ setWep(parseInt(e.key)); }
+  if(e.code==='Space'){ e.preventDefault(); fireNova(); }
+});
 
-        class Missile {
-            constructor(sx, sy, tx, ty, type) {
-                this.x = sx; this.y = sy; this.type = type;
-                const angle = Math.atan2(ty - sy, tx - sx);
-                let speed = (type === 2) ? 12 : (type === 4 ? 18 : 42);
-                this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
-            }
-            update() {
-                if (this.type === 4) {
-                    let target = [...blocks, ...fighters].reduce((p, c) => Math.hypot(c.x-this.x, c.y-this.y) < p.d ? {d: Math.hypot(c.x-this.x, c.y-this.y), o: c} : p, {d:3000, o:null}).o;
-                    if(target) {
-                        let a = Math.atan2(target.y - this.y, target.x - this.x);
-                        this.vx += Math.cos(a) * 4; this.vy += Math.sin(a) * 4;
-                        let m = Math.hypot(this.vx, this.vy); this.vx = (this.vx/m)*28; this.vy = (this.vy/m)*28;
-                    }
-                }
-                for(let i=0; i<5; i++) {
-                    this.x += this.vx/5; this.y += this.vy/5;
-                    if(this.checkColl()) return false;
-                }
-                return (this.y > 0 && this.x > 0 && this.x < (canvas.width/window.devicePixelRatio));
-            }
-            checkColl() {
-                for (let i = 0; i < blocks.length; i++) {
-                    let b = blocks[i];
-                    if (Math.abs(this.x - (b.x+15)) < 28 && Math.abs(this.y - (b.y+15)) < 28) {
-                        if (b.type === 'penalty') { score -= 10; playSound(80, 'sine', 0.3, 0.2); }
-                        else if (b.type === 'bonus') { score += 5; charge = Math.min(100, charge + 15); playSound(1200, 'sine', 0.4, 0.1); }
-                        else if (b.type === 'shield') { hasShield = true; shieldStat.innerText = "SHIELD: ACTIVE"; playSound(1000, 'sine', 0.5, 0.2); }
-                        else { score += 1; charge = Math.min(100, charge + 2); playSound(600, 'square', 0.05, 0.05); }
-                        blocks.splice(i, 1); burst(this.x, this.y, b.type==='penalty'?'#f00':(b.type==='shield'?'#07f':'#0f4')); updateProgression(); return true;
-                    }
-                }
-                if (boss && this.x > boss.x && this.x < boss.x + boss.width && this.y > boss.y && this.y < boss.y + boss.height) {
-                    boss.hp -= (this.type === 2 ? 60 : 10); playSound(200, 'sawtooth', 0.05, 0.1); return true;
-                }
-                return false;
-            }
-            draw() { ctx.fillStyle = this.type === 4 ? "#f0f" : "#fff"; ctx.fillRect(this.x-2, this.y-2, 5, 5); }
-        }
+/* ── INPUT: MOUSE ── */
+canvas.addEventListener('mousedown',e=>{
+  if(!isLive) return;
+  initAudio();
+  const rect=canvas.getBoundingClientRect();
+  const mx=(e.clientX-rect.left)*(LW/rect.width);
+  const my=(e.clientY-rect.top)*(LH/rect.height);
+  fireWeapon(mx,my);
+},{passive:true});
 
-        function updateProgression() {
-            const cfg = DIFF_CONFIG[currentDiff];
-            hudScore.innerText = score; novaFill.style.width = charge + "%";
-            
-            // PB STORAGE LOCK
-            const currentPB = parseInt(localStorage.getItem('VS_PB_' + opName) || 0);
-            if (score > currentPB) localStorage.setItem('VS_PB_' + opName, score);
+/* ── INPUT: TOUCH ── */
+const touchAim=document.getElementById('touch-aim');
+let lastTouch=null;
 
-            if (score < 0) sidebar.classList.add('glitch-active'); else sidebar.classList.remove('glitch-active');
-            hudRank.innerText = RANK_TITLES[Math.min(Math.floor((Math.max(0, score)/cfg.target) * 6), 5)];
-            
-            if (score >= cfg.target && !isBossRush) { 
-                const clears = JSON.parse(localStorage.getItem('VS_CLEARS_' + opName) || '{}');
-                clears[currentDiff] = true; localStorage.setItem('VS_CLEARS_' + opName, JSON.stringify(clears));
-                isLive = false; document.getElementById('victory-scr').style.display='flex'; document.getElementById('max-rank-title').innerText=cfg.rank; 
-            }
-            if ((score >= 500 || isBossRush) && !boss) { 
-                isBossActive = true; const hp = isBossRush ? 5000 + (score*3) : cfg.bossHp;
-                boss = { x: (canvas.width/window.devicePixelRatio)/2 - 150, y: -100, width: 300, height: 80, hp, maxHp: hp, dir: 1, 
-                update(){ if(this.y < 60) this.y += 0.5; this.x += 2*this.dir; if(this.x<0 || this.x+this.width > (canvas.width/window.devicePixelRatio)) this.dir*=-1; bossBar.style.display='block'; bossHpFill.style.width=(this.hp/this.maxHp*100)+"%"; return this.hp > 0; }, 
-                draw(){ ctx.fillStyle="#050505"; ctx.strokeStyle="#f00"; ctx.lineWidth=4; ctx.fillRect(this.x,this.y,this.width,this.height); ctx.strokeRect(this.x,this.y,this.width,this.height); } }; 
-            }
-        }
+function handleTouchFire(e){
+  if(!isLive) return;
+  initAudio();
+  const t=e.touches[0]||e.changedTouches[0]; if(!t) return;
+  const rect=canvas.getBoundingClientRect();
+  const mx=(t.clientX-rect.left)*(LW/rect.width);
+  const my=(t.clientY-rect.top)*(LH/rect.height);
+  fireWeapon(mx,my);
+}
+canvas.addEventListener('touchstart',handleTouchFire,{passive:true});
+touchAim.addEventListener('touchstart',handleTouchFire,{passive:true});
 
-        function burst(x, y, c) { for(let i=0; i<10; i++) fx.push({ x, y, vx:(Math.random()-0.5)*15, vy:(Math.random()-0.5)*15, a:1, update(){ this.x+=this.vx; this.y+=this.vy; this.a-=0.05; return this.a>0; }, draw(){ ctx.globalAlpha=this.a; ctx.fillStyle=c; ctx.fillRect(this.x,this.y,3,3); ctx.globalAlpha=1; } }); }
-        function addLog(u, m) { const d = document.createElement('div'); d.className = 'log-entry'; d.innerHTML = `<span class="log-user">${u}:</span> ${m}`; chatLog.prepend(d); if(chatLog.childNodes.length > 15) chatLog.lastChild.remove(); }
+function fireWeapon(tx,ty){
+  const cx=LW/2, by=LH-GROUND-2;
+  if(activeWep===3){
+    for(let i=-1;i<=1;i++) projectiles.push(new Missile(cx,by,tx+(i*90),ty,3));
+  } else {
+    projectiles.push(new Missile(cx,by,tx,ty,activeWep));
+  }
+  playSound(activeWep===2?140:750,'square',.1,.06);
+}
 
-        function runEngine() {
-            if (!isLive) return;
-            const cfg = DIFF_CONFIG[currentDiff];
-            const w = canvas.width / window.devicePixelRatio, h = canvas.height / window.devicePixelRatio;
-            ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,w,h);
-            ctx.fillStyle = '#0f4'; ctx.fillRect(0, h - GROUND, w, GROUND);
-            if (hasShield) { ctx.strokeStyle = '#07f'; ctx.lineWidth = 6; ctx.strokeRect(2, h-GROUND+2, w-4, GROUND-4); }
+/* ── RESIZE ── */
+let resizeTO=null;
+window.addEventListener('resize',()=>{
+  clearTimeout(resizeTO);
+  resizeTO=setTimeout(()=>{ if(isLive){ resizeCanvas(); } },150);
+});
 
-            frame++;
-            if (!isBossRush && frame % cfg.spawnRate === 0) {
-                let r = Math.random();
-                let type = r < 0.25 ? 'penalty' : (r > 0.98 ? 'shield' : (r > 0.90 ? 'bonus' : 'standard'));
-                blocks.push({ x: Math.random()*(w-30), y:-50, type, speed: h * cfg.speedMult });
-            }
+/* ── INIT ── */
+buildScanlines();
+resizeCanvas();
 
-            blocks = blocks.filter(b => {
-                b.y += b.speed;
-                if (b.y > h - GROUND) { 
-                    if(b.type === 'standard' || b.type === 'bonus' || b.type === 'shield') { 
-                        if (hasShield) { 
-                            hasShield = false; shieldStat.innerText = "SHIELD: OFF"; playSound(200, 'sine', 0.6, 0.3); 
-                            addLog("SYS", "AEGIS SHIELD DEPLETED"); return false; 
-                        }
-                        isLive=false; document.getElementById('breach-scr').style.display='flex'; document.getElementById('final-score').innerText=score; 
-                    } return false; 
-                }
-                ctx.fillStyle = b.type==='penalty'?'#f00':(b.type==='bonus'?'#ffd700':(b.type==='shield'?'#07f':'#0f4'));
-                ctx.fillRect(b.x, b.y, 30, 30); ctx.strokeRect(b.x, b.y, 30, 30);
-                return true;
-            });
-            projectiles = projectiles.filter(p => p.update() ? (p.draw(), true) : false);
-            fx = fx.filter(f => f.update() ? (f.draw(), true) : false);
-            if (boss) if (!boss.update()) { boss = null; score += 2000; isBossActive = false; bossBar.style.display='none'; } else boss.draw();
-            loopId = requestAnimationFrame(runEngine);
-        }
+/* Prevent context menu on long-press */
+canvas.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('contextmenu',e=>{if(isLive)e.preventDefault();});
 
-        window.addEventListener('keydown', (e) => {
-            if (['1','2','3','4'].includes(e.key)) { activeWep = parseInt(e.key); document.querySelectorAll('.wep-btn').forEach(b => b.classList.remove('active')); document.getElementById('w' + e.key).classList.add('active'); }
-            if (e.code === 'Space' && charge >= 100) { charge = 0; novaFill.style.width = "0%"; blocks = []; if(boss) boss.hp -= 4000; playSound(40, 'sawtooth', 1.5, 0.6, 2000); }
-        });
+/* Focus the input on load */
+window.addEventListener('load',()=>setTimeout(()=>document.getElementById('opID').focus(),100));
 
-        canvas.addEventListener('mousedown', (e) => {
-            if (!isLive) return;
-            const rect = canvas.getBoundingClientRect();
-            const w = canvas.width/window.devicePixelRatio, h = canvas.height/window.devicePixelRatio;
-            const mx = (e.clientX - rect.left) * (w / rect.width);
-            const my = (e.clientY - rect.top) * (h / rect.height);
-            const cx = w/2, by = h - GROUND;
-            if (activeWep === 3) { for(let i=-1; i<=1; i++) projectiles.push(new Missile(cx, by, mx + (i*100), my, 3)); } 
-            else projectiles.push(new Missile(cx, by, mx, my, activeWep));
-            playSound(activeWep === 2 ? 140 : 750, 'square', 0.1, 0.06);
-        });
-
-        window.addEventListener('resize', () => { if(isLive) launchGrid(); });
-    </script>
+/* Keyboard enter on auth */
+document.getElementById('opID').addEventListener('keydown',e=>{ if(e.key==='Enter') authOperator(); });
+</script>
 </body>
 </html>
